@@ -1,11 +1,9 @@
 import sys
 import json
 import random
-import pprint
 from tabulate import tabulate
-from time import sleep
-import math
 import game.deck as deck
+import game.state as state
 
 PLAYER1 = 'player1'
 PLAYER2 = 'player2'
@@ -1208,50 +1206,7 @@ def get_manual_move(player):
 deck1 = deck.create('decks/ST01 - Strawhat.deck')
 deck2 = deck.create('decks/ST04 - Animal Kingdom.deck')
 
-game = {
-    'turn': 0,
-    'playerTurn': None,
-    PLAYER1: {
-        'deck': deck1['deck'],
-        'leader': deck1['leader'],
-        'field': {
-            'leader': {
-                'code': deck1['leader'],
-                'status': 'active',
-                'powerIncreaseBattle': 0,
-                'attachedDon': 0,
-            },
-            'stage': {},
-            'characters': [],
-            'don': {'active': 0, 'rested': 0}
-        },
-        'hand': [],
-        'trash': [],
-        'life': [],
-        'don_deck': 10,
-        'battleEffects': []
-    },
-    PLAYER2: {
-        'deck': deck2['deck'],
-        'leader': deck2['leader'],
-        'field': {
-            'leader': {
-                'code': deck2['leader'],
-                'status': 'active',
-                'powerIncreaseBattle': 0,
-                'attachedDon': 0,
-            },
-            'stage': {},
-            'characters': [],
-            'don': {'active': 0, 'rested': 0}
-        },
-        'hand': [],
-        'trash': [],
-        'life': [],
-        'don_deck': 10,
-        'battleEffects': []
-    },
-}
+game = state.create_state(deck1, deck2)
 
 def ai_move1(player):
     move = ai_move_aggro(player)
