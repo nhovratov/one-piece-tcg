@@ -1,0 +1,9 @@
+{
+  "effect": {
+    "trigger": "whenAttacking",
+    "type": "ignoreBlocker",
+    "power": 2000,
+    "comparison": "lessThanOrEqual",
+    "duration": "battle"
+  }
+}

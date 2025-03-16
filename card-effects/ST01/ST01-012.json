@@ -1,0 +1,9 @@
+{
+  "hasRush": true,
+  "effect": {
+    "trigger": "whenAttacking",
+    "type": "ignoreBlocker",
+    "donCost": 2,
+    "duration": "battle"
+  }
+}

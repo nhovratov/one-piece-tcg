@@ -1,0 +1,10 @@
+{
+  "effect": {
+    "donCost": 1,
+    "trigger": "whenAttacking",
+    "restriction": "oncePerTurn",
+    "type": "search",
+    "searchType": ["FILM"],
+    "quantity": 1
+  }
+}

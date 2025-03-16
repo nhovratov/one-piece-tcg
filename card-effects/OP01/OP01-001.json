@@ -1,0 +1,9 @@
+{
+  "effect": {
+    "donCost": 1,
+    "turn": "yourTurn",
+    "type": "powerManipulation",
+    "power": 1000,
+    "target": "yourCharacters"
+  }
+}
