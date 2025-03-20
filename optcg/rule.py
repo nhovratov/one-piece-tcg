@@ -1,6 +1,7 @@
 import optcg.state as state
 import optcg.util as util
 import optcg.info as info
+import optcg.calc as calc
 from optcg.state import game
 
 def player_is_allowed_to_attack():
@@ -53,7 +54,7 @@ def canBlock(player):
             continue
         if info.hasBlocker(character['code']):
             if ignoreBlockerEffect is not None:
-                characterPower = state.get_character_power(player, character)
+                characterPower = calc.get_character_power(player, character)
                 effectPower = ignoreBlockerEffect['power']
                 if ignoreBlockerEffect['comparison'] == 'lessThanOrEqual':
                     if characterPower <= effectPower:

@@ -3,6 +3,7 @@ import optcg.info as info
 from optcg.log import log
 import optcg.state as state
 import optcg.util as util
+import optcg.calc as calc
 
 def printAvailableDon(player):
     log('DON!!: ' + str(state.getAvailableDon(player)))
@@ -41,7 +42,7 @@ def printLeader(player):
     parts = [
         '[' + card_info['code'] + ']',
         card_info['name'],
-        state.get_character_power(player, leader),
+        calc.get_character_power(player, leader),
         '↑ (active)' if leader['status'] == 'active' else '→ (rested)',
     ]
     log(tabulate([parts], headers=['Leader', 'Name', 'Power', 'Status'], tablefmt="grid", disable_numparse=True))
@@ -58,7 +59,7 @@ def printCharacters(player):
             '[' + card + ']',
             cardInfo['name'],
             '(' + str(cardInfo['cost']) + ')',
-            state.get_character_power(player, character),
+            calc.get_character_power(player, character),
             '↑ (active)' if character['status'] == 'active' else '→ (rested)',
             'Yes' if character['isExhausted'] else '',
         ]

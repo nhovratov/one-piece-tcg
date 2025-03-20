@@ -2,6 +2,7 @@ import optcg.state as state
 import optcg.util as util
 import optcg.info as info
 import optcg.rule as rule
+import optcg.calc as calc
 
 ai_move1_method = None
 ai_move2_method = None
@@ -83,7 +84,7 @@ def ai_move_aggro(player):
     if canGoForLethal(player) or canGoForLethal(opponent):
         return goForLethal(player)
     availableDon = state.getAvailableDon(player)
-    powerOpponentLeader = state.get_leader_power(opponent)
+    powerOpponentLeader = calc.get_leader_power(opponent)
     highestCostIndex = util.getHighestPlayableCostCharacterIndexInHand(player)
     highestCost = util.getHighestPlayableCostInHand(player)
     availableDonForBattle = availableDon - highestCost
@@ -98,7 +99,7 @@ def ai_move_aggro(player):
         index = characterList.index(character)
         if not rule.can_attack_with_character(player, index):
             continue
-        characterPower = state.get_character_power(player, character)
+        characterPower = calc.get_character_power(player, character)
         if characterPower >= powerOpponentLeader:
             return 'b:' + str(index) + ':l'
         elif characterPower + (availableDonForBattle * 1000) >= powerOpponentLeader:
@@ -128,8 +129,8 @@ def ai_move_control(player):
     if canGoForLethal(player) or canGoForLethal(opponent):
         return goForLethal(player)
     availableDon = state.getAvailableDon(player)
-    powerLeader = state.get_leader_power(player)
-    powerOpponentLeader = state.get_leader_power(opponent)
+    powerLeader = calc.get_leader_power(player)
+    powerOpponentLeader = calc.get_leader_power(opponent)
     # Prefer to play characters on curve
     highestBlockerCostIndex = None
     highestBlockerCost = 0
@@ -145,11 +146,11 @@ def ai_move_control(player):
     if rule.player_is_allowed_to_attack():
         # Find rested characters
         characterToAttack = 'l'
-        powerOpponentCharacter = state.get_leader_power(opponent)
+        powerOpponentCharacter = calc.get_leader_power(opponent)
         for (index, character) in enumerate(state.get_characterList(opponent)):
             if rule.can_attack_character(player, index):
                 characterToAttack = index
-                powerOpponentCharacter = state.get_character_power(opponent, character)
+                powerOpponentCharacter = calc.get_character_power(opponent, character)
                 break
         # Attack with characters:
         for (index, character) in enumerate(state.get_characterList(player)):
@@ -157,7 +158,7 @@ def ai_move_control(player):
                 continue
             if info.hasBlocker(character['code']):
                 continue
-            characterPower = state.get_character_power(player, character)
+            characterPower = calc.get_character_power(player, character)
             if characterPower >= powerOpponentCharacter:
                 return 'b:' + str(index) + ':' + str(characterToAttack)
             elif characterPower + (availableDonForBattle * 1000) >= powerOpponentCharacter:
@@ -258,7 +259,7 @@ def canGoForLethal(player):
     # @todo take opponent counter into account
     playerTurn = state.get_turn_player()
     opponent = util.getOpponent(player)
-    opponentLeaderPower = state.get_leader_power(opponent)
+    opponentLeaderPower = calc.get_leader_power(opponent)
     opponentLife = state.get_life_count(opponent)
     requiredHits = opponentLife + 1
     availableDon = state.getAvailableDon(player)
@@ -284,7 +285,7 @@ def canGoForLethal(player):
         index = characterList.index(character)
         if playerTurn == player and not rule.can_attack_with_character(player, index):
             continue
-        power = state.get_character_power(player, character)
+        power = calc.get_character_power(player, character)
         if power < opponentLeaderPower:
             diff = opponentLeaderPower - power
             quantity = int(diff / 1000)
@@ -299,7 +300,7 @@ def canGoForLethal(player):
 
 def goForLethal(player):
     opponent = util.getOpponent(player)
-    opponentLeaderPower = state.get_leader_power(opponent)
+    opponentLeaderPower = calc.get_leader_power(opponent)
     availableDon = state.getAvailableDon(player)
 
     # Play rush characters
@@ -316,7 +317,7 @@ def goForLethal(player):
     sortedCharacters.sort(key=info.sortCharactersByPower, reverse=True)
     for (index, character) in enumerate(sortedCharacters):
         indexCharacter = characterList.index(character)
-        characterPower = state.get_character_power(player, character)
+        characterPower = calc.get_character_power(player, character)
         if characterPower < opponentLeaderPower:
             diff = opponentLeaderPower - characterPower
             quantity = int(diff / 1000)
@@ -326,9 +327,9 @@ def goForLethal(player):
     # If there is still DON!! left, then distribute it evenly under the leader and characters with at least the opponent leader power.
     if availableDon > 0:
         indexLowestAttacker = 'l'
-        lastLowestPower = state.get_leader_power(player)
+        lastLowestPower = calc.get_leader_power(player)
         for (index, character) in enumerate(characterList):
-            characterPower = state.get_character_power(player, character)
+            characterPower = calc.get_character_power(player, character)
             if characterPower >= opponentLeaderPower and (
                     lastLowestPower is None or (characterPower < lastLowestPower)):
                 indexLowestAttacker = index
@@ -343,7 +344,7 @@ def goForLethal(player):
     sortedCharactersAscending.sort(key=info.sortCharactersByPower)
     for character in sortedCharactersAscending:
         index = characterList.index(character)
-        characterPower = state.get_character_power(player, character)
+        characterPower = calc.get_character_power(player, character)
         if rule.can_attack_with_character(player, index) and characterPower >= opponentLeaderPower:
             return 'b:' + str(index) + ':l'
     return 'e'

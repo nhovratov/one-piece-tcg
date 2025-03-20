@@ -8,6 +8,7 @@ import optcg.effect as effect
 import optcg.ai as ai
 import optcg.view as view
 import optcg.action as action
+import optcg.calc as calc
 from optcg.state import game
 
 player1_move = None
@@ -235,7 +236,7 @@ def battle(player, attackingCharacterIndexOrLeader, attackTargetIndexOrLeader):
     + ' [' + targetInfo['code'] + ']')
 
     effect.resolveWhenAttackingEffect(player, attackingCharacterOrLeader)
-    attackerPower = state.get_character_power(player, attackingCharacterOrLeader)
+    attackerPower = calc.get_character_power(player, attackingCharacterOrLeader)
 
     if rule.canBlock(opponent) and attackerPower > 6000:
         blockerIndex = getBlocker(opponent)
@@ -303,7 +304,7 @@ def getBlocker(player):
             continue
         if info.hasBlocker(character['code']):
             if ignoreBlockerEffect is not None:
-                characterPower = state.get_character_power(player, character)
+                characterPower = calc.get_character_power(player, character)
                 effectPower = ignoreBlockerEffect['power']
                 if ignoreBlockerEffect['comparison'] == 'lessThanOrEqual':
                     if characterPower <= effectPower:
