@@ -1,0 +1,8 @@
+player1:
+  deck: "deck1"
+  ai_strategy_attack: "ai_move_aggro"
+  ai_strategy_counter: "ai_counter_early_characters"
+player2:
+  deck: "deck2"
+  ai_strategy_attack: "ai_move_control"
+  ai_strategy_counter: "ai_counter_early_characters"

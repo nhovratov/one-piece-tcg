@@ -1,4 +1,5 @@
 import sys
+import yaml
 import optcg.deck as deck
 import optcg.state as state
 import optcg.ai as ai
@@ -9,13 +10,21 @@ import optcg.log as log
 print_log = True if len(sys.argv) > 1 and sys.argv[1] == 'print' else False
 log.set_print_log(print_log)
 
-deck1 = deck.create('deck1')
-deck2 = deck.create('deck2')
+with open('config.yaml') as stream:
+    try:
+        config = yaml.safe_load(stream)
+    except yaml.YAMLError as exc:
+        print(exc)
+player1_conf = config['player1']
+player2_conf = config['player2']
+
+deck1 = deck.create(player1_conf['deck'])
+deck2 = deck.create(player2_conf['deck'])
 state.create(deck1, deck2)
-ai.set_ai_move1(ai.ai_move_aggro)
-ai.set_ai_move2(ai.ai_move_control)
-ai.set_ai_counter_move1(ai.ai_counter_early_characters)
-ai.set_ai_counter_move2(ai.ai_counter_early_characters)
+ai.set_ai_move1(getattr(ai, player1_conf['ai_strategy_attack']))
+ai.set_ai_move2(getattr(ai, player2_conf['ai_strategy_attack']))
+ai.set_ai_counter_move1(getattr(ai, player1_conf['ai_strategy_counter']))
+ai.set_ai_counter_move2(getattr(ai, player2_conf['ai_strategy_counter']))
 action.set_player1_move(ai.ai_move1)
 action.set_player2_move(ai.ai_move2)
 
