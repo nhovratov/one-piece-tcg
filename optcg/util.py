@@ -80,7 +80,7 @@ def getLowestCost(player):
 
 def getNumberOfCharactersAbleToAttack(player):
     activeCharacters = []
-    for character in state.get_characterList(player):
-        if rule.can_attack_with_character(player, character):
+    for (index, character) in enumerate(state.get_characterList(player)):
+        if rule.can_attack_with_character(player, index):
             activeCharacters.append(character)
     return len(activeCharacters)

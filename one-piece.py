@@ -9,8 +9,8 @@ import optcg.log as log
 print_log = True if len(sys.argv) > 1 and sys.argv[1] == 'print' else False
 log.set_print_log(print_log)
 
-deck1 = deck.create('decks/ST01 - Strawhat.deck')
-deck2 = deck.create('decks/ST04 - Animal Kingdom.deck')
+deck1 = deck.create('deck1')
+deck2 = deck.create('deck2')
 state.create(deck1, deck2)
 ai.set_ai_move1(ai.ai_move_aggro)
 ai.set_ai_move2(ai.ai_move_control)

@@ -1,5 +1,5 @@
 def create(name):
-    blueprint = read(name)
+    blueprint = read('decks/' + name + '.deck')
     card_list = blueprint.splitlines()
     leader = card_list[0]
     leaderCard = extract_card_count(leader)['name']

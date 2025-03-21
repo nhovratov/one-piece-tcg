@@ -70,7 +70,8 @@ def character_exists_at_index(player, index):
     return index < len(get_characterList(player))
 
 def get_character(player, index):
-    return get_characterList(player)[index]
+    character_list = get_characterList(player)
+    return character_list[index]
 
 def get_characterList(player):
     return game[player]['field']['characters']
