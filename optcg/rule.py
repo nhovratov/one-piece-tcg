@@ -38,7 +38,7 @@ def can_counter(player):
 def can_play_card(player, index, reservedDon = 0):
     card = state.get_hand(player)[index]
     cardInfo = info.get_card_info(card)
-    availableDon = state.getAvailableDon(player)
+    availableDon = state.get_available_don(player)
     availableDon -= reservedDon
     return cardInfo['cost'] <= availableDon
 

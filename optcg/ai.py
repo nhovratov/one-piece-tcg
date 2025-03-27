@@ -83,7 +83,7 @@ def ai_move_aggro(player):
     opponent = util.getOpponent(player)
     if canGoForLethal(player) or canGoForLethal(opponent):
         return goForLethal(player)
-    availableDon = state.getAvailableDon(player)
+    availableDon = state.get_available_don(player)
     powerOpponentLeader = calc.get_leader_power(opponent)
     highestCostIndex = util.getHighestPlayableCostCharacterIndexInHand(player)
     highestCost = util.getHighestPlayableCostInHand(player)
@@ -128,7 +128,7 @@ def ai_move_control(player):
     opponent = util.getOpponent(player)
     if canGoForLethal(player) or canGoForLethal(opponent):
         return goForLethal(player)
-    availableDon = state.getAvailableDon(player)
+    availableDon = state.get_available_don(player)
     powerLeader = calc.get_leader_power(player)
     powerOpponentLeader = calc.get_leader_power(opponent)
     # Prefer to play characters on curve
@@ -262,7 +262,7 @@ def canGoForLethal(player):
     opponentLeaderPower = calc.get_leader_power(opponent)
     opponentLife = state.get_life_count(opponent)
     requiredHits = opponentLife + 1
-    availableDon = state.getAvailableDon(player)
+    availableDon = state.get_available_don(player)
     if playerTurn != player:
         availableDon += 2
         if availableDon > 10:
@@ -301,7 +301,7 @@ def canGoForLethal(player):
 def goForLethal(player):
     opponent = util.getOpponent(player)
     opponentLeaderPower = calc.get_leader_power(opponent)
-    availableDon = state.getAvailableDon(player)
+    availableDon = state.get_available_don(player)
 
     # Play rush characters
     if state.getNumberOfPlayerCharacters(player) < 5:
@@ -365,7 +365,7 @@ def getRedZoroMove(player):
     attachedDon = state.getAttachedDon(leader)
     if attachedDon > 0:
         return None
-    availableDon = state.getAvailableDon(player)
+    availableDon = state.get_available_don(player)
     if availableDon < 1:
         return None
     highestCost = util.getHighestPlayableCostInHand(player)
@@ -390,7 +390,7 @@ def getGreenUtaMove(player):
         return None
     if not rule.can_attack_with_leader(player):
         return None
-    availableDon = state.getAvailableDon(player)
+    availableDon = state.get_available_don(player)
     if availableDon == 0:
         return None
     highestCost = util.getHighestPlayableCostInHand(player)

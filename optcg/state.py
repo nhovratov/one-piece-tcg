@@ -48,7 +48,7 @@ def get_leader(player):
 def get_life_count(player):
     return len(game[player]['life'])
 
-def getAvailableDon(player):
+def get_available_don(player):
     return game[player]['field']['don']['active']
 
 def getRestedDon(player):

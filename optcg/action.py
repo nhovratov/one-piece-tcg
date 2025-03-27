@@ -102,7 +102,7 @@ def return_attached_don(player, character):
     character['attachedDon'] = 0
 
 def attach_don(player, index, number):
-    numberActiveDon = state.getAvailableDon(player)
+    numberActiveDon = state.get_available_don(player)
     if number > numberActiveDon:
         number = numberActiveDon
     game[player]['field']['don']['active'] -= number

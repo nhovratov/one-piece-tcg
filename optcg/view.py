@@ -6,14 +6,14 @@ import optcg.util as util
 import optcg.calc as calc
 
 def printAvailableDon(player):
-    log('DON!!: ' + str(state.getAvailableDon(player)))
+    log('DON!!: ' + str(state.get_available_don(player)))
 
 def printNumberOfCardsInHand(player):
     log('Number of cards in hand: ' + str(len(state.get_hand(player))))
 
 def printStatus(player):
     log('')
-    table = [[state.get_life_count(player), state.getAvailableDon(player), state.get_number_of_cards_in_hand(player)]]
+    table = [[state.get_life_count(player), state.get_available_don(player), state.get_number_of_cards_in_hand(player)]]
     headers = ['Life', 'DON!!', 'Hand size']
     log(tabulate(table, headers=headers, tablefmt="grid", disable_numparse=True))
 
