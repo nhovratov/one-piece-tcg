@@ -38,4 +38,6 @@ action.init_life('player2')
 while True:
     action.next_turn()
     action.player_action()
+    if state.has_winner():
+        break
     view.printBoard('player1')

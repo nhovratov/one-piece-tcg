@@ -59,6 +59,12 @@ def resolveEffect(player, character):
     effect = card_info.get('effect')
     if effect is None:
         return
+    restriction = effect.get('restriction')
+    if restriction is not None:
+        if restriction == 'oncePerTurn':
+            effect_used_this_turn = character.get('effect_used_this_turn')
+            if effect_used_this_turn:
+                return
     type = effect['type']
     if type == 'search':
         quantity = effect['quantity']
@@ -66,8 +72,8 @@ def resolveEffect(player, character):
         cards = action.revealCards(player, quantity)
         addedCard = None
         for card in cards:
-            cardInfo = info.get_card_info(card)
-            cardArcheTypes = cardInfo['archetype']
+            card_info = info.get_card_info(card)
+            cardArcheTypes = card_info['archetype']
             intersection = list(set(archeTypes) & set(cardArcheTypes))
             if len(intersection) > 0:
                 addedCard = card
@@ -76,12 +82,14 @@ def resolveEffect(player, character):
         if addedCard is not None:
             cards.remove(card)
         if len(cards) > 0:
-            action.bottomDeck(player, cards)
+            action.bottom_deck(player, cards)
     elif type == 'ignoreBlocker':
         duration = effect['duration']
         if duration == 'battle':
             opponent = util.getOpponent(player)
             game[opponent]['battleEffects'].append(effect)
+    if restriction == 'oncePerTurn':
+        character['effect_used_this_turn'] = True
         # todo implement turn duration
 
 def resolveWhenAttackingEffect(player, character):

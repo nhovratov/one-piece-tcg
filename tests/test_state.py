@@ -2,7 +2,7 @@ import unittest
 import optcg.state as state
 from optcg.state import game
 
-class TestStringMethods(unittest.TestCase):
+class TestStateMethods(unittest.TestCase):
 
     def test_create(self):
         deck1 = {

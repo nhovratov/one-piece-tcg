@@ -1,6 +1,7 @@
 import optcg.info as info
 
 game = {
+    'winner': None,
     'turn': 0,
     'playerTurn': None,
     'player1': {},
@@ -110,3 +111,16 @@ def isCharacterRested(player, index):
 def getNumberOfActiveCharacters(player):
     activeCharacters = [character for character in game[player]['field']['characters'] if character['status'] == 'active']
     return len(activeCharacters)
+
+def get_deck(player):
+    return game[player]['deck']
+
+def set_winner(player):
+    game['winner'] = player
+
+def has_winner():
+    return game['winner'] is not None
+
+def _inject_state(state):
+    game.clear()
+    game.update(state)

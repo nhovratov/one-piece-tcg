@@ -25,23 +25,31 @@ def set_player2_move(move):
 def player_action():
     player = game['playerTurn']
     while True:
+        if state.has_winner():
+            break
         if player == 'player1':
             move = ai.ai_move1(player)
         else:
             move = ai.ai_move2(player)
-        arguments = move.split(':')
-        chosen_action = arguments[0]
-        if chosen_action == 'e':
+        result = perform_move(player, move)
+        if not result:
             break
-        elif chosen_action == 'c':
-            characterIndexToTrash = None
-            if len(arguments) == 3:
-                characterIndexToTrash = int(arguments[2])
-            action.play_card(player, int(arguments[1]), characterIndexToTrash)
-        elif chosen_action == 'b':
-            action.battle(player, arguments[1], arguments[2])
-        elif chosen_action == 'g':
-            action.attach_don(player, arguments[1], int(arguments[2]))
+
+def perform_move(player, move):
+    arguments = move.split(':')
+    chosen_action = arguments[0]
+    if chosen_action == 'e':
+        return False
+    elif chosen_action == 'c':
+        characterIndexToTrash = None
+        if len(arguments) == 3:
+            characterIndexToTrash = int(arguments[2])
+        action.play_card(player, int(arguments[1]), characterIndexToTrash)
+    elif chosen_action == 'b':
+        action.battle(player, arguments[1], arguments[2])
+    elif chosen_action == 'g':
+        action.attach_don(player, arguments[1], int(arguments[2]))
+    return True
 
 def shuffle_deck(player):
     random.shuffle(game[player]['deck'])
@@ -62,7 +70,7 @@ def revealCards(player, number):
         log('Card ' + info.getHumanReadableCharacterName(card) + ' revealed')
     return cards
 
-def bottomDeck(player, cards):
+def bottom_deck(player, cards):
     game[player]['deck'] = cards + game[player]['deck']
 
 def draw_don(player, number):
@@ -115,9 +123,9 @@ def attach_don(player, index, number):
     log(player + ' attaches ' + str(number) + ' DON!! to ' + info.getHumanReadableCharacterName(cardCode))
 
 def unrest_characters(player):
-    for index, character in enumerate(game[player]['field']['characters']):
-        game[player]['field']['characters'][index]['status'] = 'active'
-        game[player]['field']['characters'][index]['isExhausted'] = False
+    for character in game[player]['field']['characters']:
+        character['status'] = 'active'
+        character['isExhausted'] = False
 
 def rest_character(player, index):
     game[player]['field']['characters'][index]['status'] = 'rested'
@@ -127,6 +135,23 @@ def rest_leader(player):
 
 def unrest_leader(player):
     game[player]['field']['leader']['status'] = 'active'
+
+def reset_board(player):
+    unrest_all_don(player)
+    return_all_attached_don(player)
+    unrest_characters(player)
+    unrest_leader(player)
+    reset_effect_restrictions(player)
+
+def reset_effect_restrictions(player):
+    for character in game[player]['field']['characters']:
+        effect_used_this_turn = character.get('effect_used_this_turn')
+        if effect_used_this_turn:
+            character['effect_used_this_turn'] = False
+    leader = state.get_leader(player)
+    effect_used_this_turn = leader.get('effect_used_this_turn')
+    if effect_used_this_turn:
+        leader['effect_used_this_turn'] = False
 
 def trash_character(player, index):
     character = state.get_character(player, index)
@@ -156,10 +181,7 @@ def next_turn():
     playerTurn = game['playerTurn']
     log('Turn: ' + str(turn))
     log('Player: ' + playerTurn)
-    unrest_all_don(playerTurn)
-    return_all_attached_don(playerTurn)
-    unrest_characters(playerTurn)
-    unrest_leader(playerTurn)
+    reset_board(playerTurn)
     if turn == 1:
         draw_don(playerTurn, 1)
     else:
@@ -282,6 +304,8 @@ def battle(player, attackingCharacterIndexOrLeader, attackTargetIndexOrLeader):
         if targetIsLeader:
             log('Turn player deals one damage')
             dealDamage(opponent)
+            if state.has_winner():
+                return
         else:
             log('Opponent\'s character ' + info.getHumanReadableCharacterName(targetInfo['code']) + ' is K.O.\'ed')
             trash_character(opponent, attackTargetIndexOrLeader)
@@ -318,7 +342,8 @@ def dealDamage(opponent):
         view.printBoard('player1')
         leaderName = info.getHumanReadableCharacterName(state.get_leader(player)['code'])
         print(leaderName + ' (' + player + ') wins')
-        exit()
+        state.set_winner(player)
+        return
     card = game[opponent]['life'][-1:]
     game[opponent]['hand'] += card
     game[opponent]['life'] = game[opponent]['life'][:-1]
