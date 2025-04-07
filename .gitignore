@@ -5,3 +5,4 @@ card-db
 fetch-db.py
 one-piece-cards.json
 config.yaml
+.vscode
