@@ -3,7 +3,7 @@ import optcg.rule as rule
 import optcg.state as state
 import optcg.util as util
 
-def manual_counter(player, attackerPower, targetPower):
+def manual_counter(player, attackerPower, targetPower, target):
     while True:
         view.printHand(player)
         print('Attacker power: ' + str(attackerPower))

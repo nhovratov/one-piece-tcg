@@ -1,7 +1,7 @@
 player1:
   deck: "deck1"
-  ai_strategy_attack: "ai_move_aggro"
-  ai_strategy_counter: "ai_counter_early_characters"
+  ai_strategy_attack: "manual"
+  ai_strategy_counter: "manual"
 player2:
   deck: "deck2"
   ai_strategy_attack: "ai_move_control"
