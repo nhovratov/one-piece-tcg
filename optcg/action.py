@@ -36,7 +36,8 @@ def player_action():
             break
 
 def perform_move(player, move):
-    arguments = move.split(':')
+    parts = move.split(' ')
+    arguments = parts[0].split(':')
     chosen_action = arguments[0]
     if chosen_action == 'e':
         return False
@@ -49,6 +50,16 @@ def perform_move(player, move):
         action.battle(player, arguments[1], arguments[2])
     elif chosen_action == 'g':
         action.attach_don(player, arguments[1], int(arguments[2]))
+    elif chosen_action == 'a':
+        if arguments[1] == 'l':
+            character_or_leader = state.get_leader(player)
+        else:
+            character_or_leader = state.get_character(player)
+        if effect.can_be_activated(player, character_or_leader):
+            log('Effect of ' + character_or_leader['code'] + ' is activated')
+            effect.resolve_effect(player, character_or_leader, parts[1:])
+        else:
+            log('Effect can not be activated')
     return True
 
 def shuffle_deck(player):
@@ -106,7 +117,7 @@ def return_all_attached_don(player):
         return_attached_don(player, character)
 
 def return_attached_don(player, character):
-    game[player]['field']['don']['active'] += state.getAttachedDon(character)
+    game[player]['field']['don']['active'] += state.get_attached_don(character)
     character['attachedDon'] = 0
 
 def attach_don(player, index, number):
@@ -121,6 +132,19 @@ def attach_don(player, index, number):
         game[player]['field']['characters'][int(index)]['attachedDon'] += number
         cardCode = state.get_character(player, int(index))['code']
     log(player + ' attaches ' + str(number) + ' DON!! to ' + info.getHumanReadableCharacterName(cardCode))
+
+def attach_rested_don(player, index, number):
+    number_rested_don = state.get_rested_don(player)
+    if number > number_rested_don:
+        number = number_rested_don
+    game[player]['field']['don']['rested'] -= number
+    if index == 'l':
+        game[player]['field']['leader']['attachedDon'] += number
+        cardCode = state.get_leader(player)['code']
+    else:
+        game[player]['field']['characters'][int(index)]['attachedDon'] += number
+        cardCode = state.get_character(player, int(index))['code']
+    log(player + ' attaches ' + str(number) + ' rested DON!! to ' + info.getHumanReadableCharacterName(cardCode))
 
 def unrest_characters(player):
     for character in game[player]['field']['characters']:
@@ -195,7 +219,7 @@ def play_card(player, index, trashCharacterIndex = None):
     cost = cardInfo['cost']
     if not rule.can_play_card(player, index):
         raise Exception('Can not play card')
-    numberOfCharacters = state.getNumberOfPlayerCharacters(player)
+    numberOfCharacters = state.get_number_of_player_characters(player)
     if numberOfCharacters == 5 and trashCharacterIndex is None:
         raise Exception('Index for trashing character on the field must be defined')
     rest_don(player, cost)
@@ -322,7 +346,7 @@ def getBlocker(player):
         if effect['type'] == 'ignoreBlocker':
             ignoreBlockerEffect = effect
             break
-    characterList = state.get_characterList(player)
+    characterList = state.get_characters(player)
     for (index, character) in enumerate(characterList):
         if state.isCharacterRested(player, index):
             continue

@@ -52,10 +52,10 @@ def get_life_count(player):
 def get_available_don(player):
     return game[player]['field']['don']['active']
 
-def getRestedDon(player):
+def get_rested_don(player):
     return game[player]['field']['don']['rested']
 
-def getNumberOfPlayerCharacters(player):
+def get_number_of_player_characters(player):
     return len(game[player]['field']['characters'])
 
 def get_turn_player():
@@ -68,22 +68,22 @@ def get_overall_don(player):
     return 10 - get_don_deck(player)
 
 def character_exists_at_index(player, index):
-    return index < len(get_characterList(player))
+    return index < len(get_characters(player))
 
 def get_character(player, index):
-    character_list = get_characterList(player)
+    character_list = get_characters(player)
     return character_list[index]
 
-def get_characterList(player):
+def get_characters(player):
     return game[player]['field']['characters']
 
 def get_game_turn():
     return game['turn']
 
 def get_don_power(player, character):
-    return getAttachedDon(character) * 1000 if player == get_turn_player() else 0
+    return get_attached_don(character) * 1000 if player == get_turn_player() else 0
 
-def getAttachedDon(character):
+def get_attached_don(character):
     return character['attachedDon']
 
 def get_character_base_power(character):

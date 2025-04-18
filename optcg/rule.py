@@ -48,8 +48,8 @@ def canBlock(player):
         if effect['type'] == 'ignoreBlocker':
             ignoreBlockerEffect = effect
             break
-    characterList = state.get_characterList(player)
-    for (index, character) in enumerate(characterList):
+    characters = state.get_characters(player)
+    for (index, character) in enumerate(characters):
         if state.isCharacterRested(player, index):
             continue
         if info.hasBlocker(character['code']):

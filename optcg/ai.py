@@ -3,6 +3,7 @@ import optcg.util as util
 import optcg.info as info
 import optcg.rule as rule
 import optcg.calc as calc
+import optcg.effect as effect
 
 ai_move1_method = None
 ai_move2_method = None
@@ -85,18 +86,18 @@ def ai_move_aggro(player):
         return goForLethal(player)
     availableDon = state.get_available_don(player)
     powerOpponentLeader = calc.get_leader_power(opponent)
-    highestCostIndex = util.getHighestPlayableCostCharacterIndexInHand(player)
+    highestCostIndex = util.get_highest_playable_cost_character_index_in_hand(player)
     highestCost = util.getHighestPlayableCostInHand(player)
     availableDonForBattle = availableDon - highestCost
 
     if not rule.player_is_allowed_to_attack():
         return 'e'
     # Attack with characters:
-    characterList = state.get_characterList(player)
-    sortedCharacters = characterList.copy()
+    characters = state.get_characters(player)
+    sortedCharacters = characters.copy()
     sortedCharacters.sort(key=info.sortCharactersByPower)
     for character in sortedCharacters:
-        index = characterList.index(character)
+        index = characters.index(character)
         if not rule.can_attack_with_character(player, index):
             continue
         characterPower = calc.get_character_power(player, character)
@@ -112,7 +113,7 @@ def ai_move_aggro(player):
         return 'b:l:l'
     # If there is enough DON to play a character, play that character.
     if highestCostIndex is not None:
-        if state.getNumberOfPlayerCharacters(player) < 5:
+        if state.get_number_of_player_characters(player) < 5:
             return 'c:' + str(highestCostIndex)
         # If board is full, check if there is something better to play.
         lowestCost = util.getLowestCost(player)
@@ -134,12 +135,12 @@ def ai_move_control(player):
     # Prefer to play characters on curve
     highestBlockerCostIndex = None
     highestBlockerCost = 0
-    highestCostIndex = util.getHighestPlayableCostCharacterIndexInHand(player, highestBlockerCost)
+    highestCostIndex = util.get_highest_playable_cost_character_index_in_hand(player, highestBlockerCost)
     highestCost = util.getHighestPlayableCostInHand(player, highestBlockerCost)
     if highestCost != availableDon:
         highestBlockerCostIndex = util.getHighestPlayableCostBlockerCharacterIndexInHand(player)
         highestBlockerCost = util.getHighestPlayableBlockerCostInHand(player)
-        highestCostIndex = util.getHighestPlayableCostCharacterIndexInHand(player, highestBlockerCost)
+        highestCostIndex = util.get_highest_playable_cost_character_index_in_hand(player, highestBlockerCost)
         highestCost = util.getHighestPlayableCostInHand(player, highestBlockerCost)
     availableDonForBattle = availableDon - highestBlockerCost - highestCost
 
@@ -147,13 +148,13 @@ def ai_move_control(player):
         # Find rested characters
         characterToAttack = 'l'
         powerOpponentCharacter = calc.get_leader_power(opponent)
-        for (index, character) in enumerate(state.get_characterList(opponent)):
+        for (index, character) in enumerate(state.get_characters(opponent)):
             if rule.can_attack_character(player, index):
                 characterToAttack = index
                 powerOpponentCharacter = calc.get_character_power(opponent, character)
                 break
         # Attack with characters:
-        for (index, character) in enumerate(state.get_characterList(player)):
+        for (index, character) in enumerate(state.get_characters(player)):
             if not rule.can_attack_with_character(player, index):
                 continue
             if info.hasBlocker(character['code']):
@@ -176,13 +177,13 @@ def ai_move_control(player):
 
     # If there is enough DON to play a character, play that character.
     if highestBlockerCostIndex is not None:
-        if state.getNumberOfPlayerCharacters(player) < 5:
+        if state.get_number_of_player_characters(player) < 5:
             return 'c:' + str(highestBlockerCostIndex)
         # If board is full, check if there is something better to play.
         lowestCostIndex = util.getLowestCostCharacterIndex(player)
         return 'c:' + str(highestBlockerCostIndex) + ':' + str(lowestCostIndex)
     if highestCostIndex is not None:
-        if state.getNumberOfPlayerCharacters(player) < 5:
+        if state.get_number_of_player_characters(player) < 5:
             return 'c:' + str(highestCostIndex)
         # If board is full, check if there is something better to play.
         lowestCostIndex = util.getLowestCostCharacterIndex(player)
@@ -270,7 +271,7 @@ def canGoForLethal(player):
 
     leaderAttack = 1 if playerTurn != player or rule.can_attack_with_leader(player) else 0
     numberOfPossibleHits = leaderAttack
-    characterList = state.get_characterList(player)
+    characterList = state.get_characters(player)
     sortedCharacters = characterList.copy()
     sortedCharacters.sort(key=info.sortCharactersByPower, reverse=True)
     leftDon = availableDon
@@ -304,13 +305,13 @@ def goForLethal(player):
     availableDon = state.get_available_don(player)
 
     # Play rush characters
-    if state.getNumberOfPlayerCharacters(player) < 5:
+    if state.get_number_of_player_characters(player) < 5:
         for (index, card) in enumerate(state.get_hand(player)):
             card_info = info.get_card_info(card)
             if info.hasRush(card) and rule.can_play_card(player, index) and card_info['power'] >= opponentLeaderPower:
                 return 'c:' + str(index)
 
-    characterList = state.get_characterList(player)
+    characterList = state.get_characters(player)
     sortedCharacters = characterList.copy()
     # First distribute DON!! to most powerful to least powerful characters
     # so that they reach at least the same power as the opponent leader.
@@ -356,13 +357,31 @@ def getLeaderMove(player):
         return getRedZoroMove(player)
     elif code == 'ST11-001':
         return getGreenUtaMove(player)
+    elif code == 'ST01-001':
+        return get_ST01_Luffy_move(player)
+    return None
+
+def get_ST01_Luffy_move(player):
+    leader = state.get_leader(player)
+    if not effect.can_be_activated(player, leader):
+        return None
+    # For now, just give leader the rested don.
+    # Can be enhanced later to be able to attack with weaker characters.
+    if state.get_rested_don(player) > 0:
+        return 'a:l l'
+    # If there is enough DON to play a character, play that character.
+    highest_cost_index = util.get_highest_playable_cost_character_index_in_hand(player)
+    if highest_cost_index is None:
+        return None
+    if state.get_number_of_player_characters(player) < 5:
+        return 'c:' + str(highest_cost_index)
     return None
 
 def getRedZoroMove(player):
     if not rule.player_is_allowed_to_attack():
         return None
     leader = state.get_leader(player)
-    attachedDon = state.getAttachedDon(leader)
+    attachedDon = state.get_attached_don(leader)
     if attachedDon > 0:
         return None
     availableDon = state.get_available_don(player)
@@ -385,7 +404,7 @@ def getGreenUtaMove(player):
     if not rule.player_is_allowed_to_attack():
         return None
     leader = state.get_leader(player)
-    attachedDon = state.getAttachedDon(leader)
+    attachedDon = state.get_attached_don(leader)
     if attachedDon > 0:
         return None
     if not rule.can_attack_with_leader(player):

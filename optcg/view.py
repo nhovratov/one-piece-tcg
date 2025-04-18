@@ -51,7 +51,7 @@ def printCharacters(player):
     log('')
     counter = 1
     table = []
-    for character in state.get_characterList(player):
+    for character in state.get_characters(player):
         card = character['code']
         cardInfo = info.get_card_info(character['code'])
         parts = [

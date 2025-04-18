@@ -7,7 +7,7 @@ def getOpponent(player):
 
 def getHighestPlayableCostInHand(player, reservedDon = 0):
     highestCost = 0
-    highestCostIndex = getHighestPlayableCostCharacterIndexInHand(player, reservedDon)
+    highestCostIndex = get_highest_playable_cost_character_index_in_hand(player, reservedDon)
     if highestCostIndex is not None:
         highestCostCard = state.get_card(player, highestCostIndex)
         highestCost = info.get_card_info(highestCostCard)['cost']
@@ -21,7 +21,7 @@ def getHighestPlayableBlockerCostInHand(player):
         highestCost = info.get_card_info(highestCostCard)['cost']
     return highestCost
 
-def getHighestPlayableCostCharacterIndexInHand(player, reservedDon = 0):
+def get_highest_playable_cost_character_index_in_hand(player, reservedDon = 0):
     hand = state.get_hand(player)
     if len(hand) == 0:
         return None
@@ -58,8 +58,8 @@ def getHighestPlayableCostBlockerCharacterIndexInHand(player):
     return currentIndex
 
 def getLowestCostCharacterIndex(player):
-    characters = state.get_characterList(player)
-    if len(characters) == 0:
+    characters = state.get_characters(player)
+    if characters == []:
         return None
     lowestCost = None
     lowestCostIndex = None
@@ -80,7 +80,7 @@ def getLowestCost(player):
 
 def getNumberOfCharactersAbleToAttack(player):
     activeCharacters = []
-    for (index, character) in enumerate(state.get_characterList(player)):
+    for (index, character) in enumerate(state.get_characters(player)):
         if rule.can_attack_with_character(player, index):
             activeCharacters.append(character)
     return len(activeCharacters)

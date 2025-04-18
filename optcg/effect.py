@@ -10,7 +10,7 @@ def checkPermanentCharacterPowerEffects(player, character):
     turnPlayer = state.get_turn_player()
     opponent = util.getOpponent(player)
 
-    for character in state.get_characterList(opponent):
+    for character in state.get_characters(opponent):
         card_info = info.get_card_info(character['code'])
         effect = card_info.get('effect', None)
         if effect == None:
@@ -25,7 +25,7 @@ def checkPermanentCharacterPowerEffects(player, character):
         if target == 'opponentCharacters' and characterInfo['type'] != 'character':
             continue
         donCost = effect.get('donCost', 0)
-        attachedDon = state.getAttachedDon(character)
+        attachedDon = state.get_attached_don(character)
         if attachedDon < donCost:
             continue
         power += effect['power']
@@ -48,13 +48,13 @@ def checkPermanentPowerEffectsLeader(player, character):
     if target == 'yourCharacters' and character_info['type'] != 'character':
         return power
     donCost = effect.get('donCost', 0)
-    attachedDon = state.getAttachedDon(turnLeader)
+    attachedDon = state.get_attached_don(turnLeader)
     if attachedDon < donCost:
         return power
     power += effect['power']
     return power
 
-def resolveEffect(player, character):
+def resolve_effect(player, character, arguments = []):
     card_info = info.get_card_info(character['code'])
     effect = card_info.get('effect')
     if effect is None:
@@ -88,6 +88,17 @@ def resolveEffect(player, character):
         if duration == 'battle':
             opponent = util.getOpponent(player)
             game[opponent]['battleEffects'].append(effect)
+    elif type == 'giveRestedDon':
+        if arguments == []:
+            print('Choose target')
+            target = input()
+        else:
+            target = arguments[0]
+        if target != 'l':
+            target = int(target)
+        # todo: Allow to specify quantity as well.
+        quantity = int(effect['quantity'])
+        action.attach_rested_don(player, target, quantity)
     if restriction == 'oncePerTurn':
         character['effect_used_this_turn'] = True
         # todo implement turn duration
@@ -101,7 +112,22 @@ def resolveWhenAttackingEffect(player, character):
         return
     donCost = effect.get('donCost', 0)
     if donCost > 0:
-        attachedDon = state.getAttachedDon(character)
-        if attachedDon < donCost:
+        attached_don = state.get_attached_don(character)
+        if attached_don < donCost:
             return
-    resolveEffect(player, character)
+    resolve_effect(player, character)
+
+def can_be_activated(player, character):
+    card_info = info.get_card_info(character['code'])
+    effect = card_info.get('effect')
+    if effect is None:
+        return False
+    if effect.get('trigger') != 'activateMain':
+        return False
+    restriction = effect.get('restriction')
+    if restriction is not None:
+        if restriction == 'oncePerTurn':
+            effect_used_this_turn = character.get('effect_used_this_turn')
+            if effect_used_this_turn:
+                return False
+    return True

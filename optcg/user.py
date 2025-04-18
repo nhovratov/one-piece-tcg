@@ -116,6 +116,22 @@ def get_manual_move(player):
                 print('Invalid input')
                 continue
             return 'g:' + str(characterToattach_donToIndex) + ':' + str(numberOfDonToAttachTo)
+        elif action == 'a':
+            view.printPlayerBoard(player)
+            print('')
+            print('Choose character or leader to activate an effect')
+            character_or_leader_effect = input()
+            character_or_leader_effect_index = character_or_leader_effect
+            if character_or_leader_effect_index != 'l':
+                try:
+                    character_or_leader_effect_index = int(character_or_leader_effect_index)
+                except:
+                    continue
+                character_or_leader_effect_index = character_or_leader_effect_index - 1
+                if not state.character_exists_at_index(player, character_or_leader_effect_index):
+                    print('')
+                    print('Invalid input')
+                    continue
+            return 'a:' + str(character_or_leader_effect_index)
         elif action == 'e':
             return 'e'
-
