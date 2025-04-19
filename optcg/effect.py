@@ -99,9 +99,22 @@ def resolve_effect(player, character, arguments = []):
         # todo: Allow to specify quantity as well.
         quantity = int(effect['quantity'])
         action.attach_rested_don(player, target, quantity)
+    elif type == 'gainRush' and state.is_exhausted(character):
+        if 'attachedDon' in effect and state.get_attached_don(character) >= effect['attachedDon']:
+            action.rush_character(character)
+
     if restriction == 'oncePerTurn':
         character['effect_used_this_turn'] = True
         # todo implement turn duration
+
+def resolve_when_attaching_don(player, character):
+    card_info = info.get_card_info(character['code'])
+    effect = card_info.get('effect')
+    if effect is None:
+        return
+    # The effect is activated as soon as enough DON is attached.
+    if 'attachedDon' in effect and not 'trigger' in effect:
+        resolve_effect(player, character)
 
 def resolveWhenAttackingEffect(player, character):
     card_info = info.get_card_info(character['code'])

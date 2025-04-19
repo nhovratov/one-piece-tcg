@@ -2,7 +2,7 @@ import unittest
 import optcg.state as state
 import optcg.action as action
 
-class TestST01_001(unittest.TestCase):
+class TestST01_004(unittest.TestCase):
 
     def test_effect_positive(self):
         game = {
@@ -19,9 +19,9 @@ class TestST01_001(unittest.TestCase):
                     },
                     'stage': {},
                     'characters': [],
-                    'don': {'active': 0, 'rested': 1}
+                    'don': {'active': 4, 'rested': 1}
                 },
-                'hand': [],
+                'hand': ['ST01-004'],
                 'trash': [],
                 'life': [],
                 'don_deck': 10,
@@ -50,14 +50,11 @@ class TestST01_001(unittest.TestCase):
         }
         state._inject_state(game)
 
-        action.perform_move('player1', 'a:l l')
+        action.perform_move('player1', 'c:0')
+        action.perform_move('player1', 'g:0:2')
+        sanji = state.get_character('player1', 0)
 
-        leader = state.get_leader('player1')
-        don = state.get_attached_don(leader)
-        rested_don = state.get_rested_don('player1')
-
-        self.assertEqual(don, 1)
-        self.assertEqual(rested_don, 0)
+        self.assertFalse(state.is_exhausted(sanji))
 
 if __name__ == '__main__':
     unittest.main()

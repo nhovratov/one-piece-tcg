@@ -125,12 +125,14 @@ def attach_don(player, index, number):
     if number > numberActiveDon:
         number = numberActiveDon
     game[player]['field']['don']['active'] -= number
+    characterOrLeader = None
     if index == 'l':
-        game[player]['field']['leader']['attachedDon'] += number
-        cardCode = state.get_leader(player)['code']
+        characterOrLeader = state.get_leader(player)
     else:
-        game[player]['field']['characters'][int(index)]['attachedDon'] += number
-        cardCode = state.get_character(player, int(index))['code']
+        characterOrLeader = state.get_character(player, int(index))
+    characterOrLeader['attachedDon'] += number
+    cardCode = characterOrLeader['code']
+    effect.resolve_when_attaching_don(player, characterOrLeader)
     log(player + ' attaches ' + str(number) + ' DON!! to ' + info.getHumanReadableCharacterName(cardCode))
 
 def attach_rested_don(player, index, number):
@@ -149,7 +151,10 @@ def attach_rested_don(player, index, number):
 def unrest_characters(player):
     for character in game[player]['field']['characters']:
         character['status'] = 'active'
-        character['isExhausted'] = False
+        rush_character(character)
+
+def rush_character(character):
+    character['isExhausted'] = False
 
 def rest_character(player, index):
     game[player]['field']['characters'][index]['status'] = 'rested'

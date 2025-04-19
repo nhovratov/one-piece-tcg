@@ -121,6 +121,9 @@ def set_winner(player):
 def has_winner():
     return game['winner'] is not None
 
+def is_exhausted(character):
+    return character['isExhausted']
+
 def _inject_state(state):
     game.clear()
     game.update(state)
