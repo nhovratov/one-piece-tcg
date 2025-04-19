@@ -100,9 +100,16 @@ def resolve_effect(player, character, arguments = []):
         quantity = int(effect['quantity'])
         action.attach_rested_don(player, target, quantity)
     elif type == 'gainRush' and state.is_exhausted(character):
-        if 'attachedDon' in effect and state.get_attached_don(character) >= effect['attachedDon']:
-            action.rush_character(character)
-
+        action.rush_character(character)
+    elif type == 'powerManipulation':
+        power = effect['power']
+        # todo: Check valid target
+        viable_target = effect['target']
+        # No target selected
+        if arguments == []:
+            return
+        chosen_target = arguments[0]
+        action.manipulate_turn_power_of_leader_or_character(player, chosen_target, power)
     if restriction == 'oncePerTurn':
         character['effect_used_this_turn'] = True
         # todo implement turn duration
@@ -113,10 +120,15 @@ def resolve_when_attaching_don(player, character):
     if effect is None:
         return
     # The effect is activated as soon as enough DON is attached.
-    if 'attachedDon' in effect and not 'trigger' in effect:
-        resolve_effect(player, character)
+    if not 'attachedDon' in effect:
+        return
+    if 'trigger' in effect:
+        return
+    if state.get_attached_don(character) < effect['attachedDon']:
+        return
+    resolve_effect(player, character)
 
-def resolveWhenAttackingEffect(player, character):
+def resolveWhenAttackingEffect(player, character, arguments = []):
     card_info = info.get_card_info(character['code'])
     effect = card_info.get('effect')
     if effect is None:
@@ -128,7 +140,7 @@ def resolveWhenAttackingEffect(player, character):
         attached_don = state.get_attached_don(character)
         if attached_don < donCost:
             return
-    resolve_effect(player, character)
+    resolve_effect(player, character, arguments)
 
 def can_be_activated(player, character):
     card_info = info.get_card_info(character['code'])

@@ -1,6 +1,6 @@
 {
   "effect": {
-    "donCost": 1,
+    "attachedDon": 1,
     "turn": "yourTurn",
     "type": "powerManipulation",
     "power": 1000,

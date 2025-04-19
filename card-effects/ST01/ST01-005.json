@@ -1,0 +1,11 @@
+{
+    "effect": {
+        "type": "powerManipulation",
+        "attachedDon": 1,
+        "trigger": "whenAttacking",
+        "power": 1000,
+        "duration": "turn",
+        "target": "leaderOrCharacter",
+        "excludeSelf": true
+    }
+}

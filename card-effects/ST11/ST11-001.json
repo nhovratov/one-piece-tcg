@@ -1,6 +1,6 @@
 {
   "effect": {
-    "donCost": 1,
+    "attachedDon": 1,
     "trigger": "whenAttacking",
     "restriction": "oncePerTurn",
     "type": "search",

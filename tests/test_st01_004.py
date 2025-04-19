@@ -5,49 +5,15 @@ import optcg.action as action
 class TestST01_004(unittest.TestCase):
 
     def test_effect_positive(self):
+        statePlayer1 = state.create_player_state({'deck': [], 'leader': 'ST01-001'})
+        statePlayer2 = state.create_player_state({'deck': [], 'leader': 'ST01-001'})
         game = {
             'playerTurn': 'player1',
-            'player1': {
-                'deck': [],
-                'leader': 'ST01-001',
-                'field': {
-                    'leader': {
-                        'code': 'ST01-001',
-                        'status': 'active',
-                        'powerIncreaseBattle': 0,
-                        'attachedDon': 0,
-                    },
-                    'stage': {},
-                    'characters': [],
-                    'don': {'active': 4, 'rested': 1}
-                },
-                'hand': ['ST01-004'],
-                'trash': [],
-                'life': [],
-                'don_deck': 10,
-                'battleEffects': []
-            },
-            'player2': {
-                'deck': [],
-                'leader': 'ST11-001',
-                'field': {
-                    'leader': {
-                        'code': 'ST11-001',
-                        'status': 'active',
-                        'powerIncreaseBattle': 0,
-                        'attachedDon': 1,
-                    },
-                    'stage': {},
-                    'characters': [],
-                    'don': {'active': 0, 'rested': 0}
-                },
-                'hand': [],
-                'trash': [],
-                'life': [],
-                'don_deck': 10,
-                'battleEffects': []
-            }
+            'player1': statePlayer1,
+            'player2': statePlayer2
         }
+        game['player1']['field']['don']['active'] = 4
+        game['player1']['hand'] = ['ST01-004']
         state._inject_state(game)
 
         action.perform_move('player1', 'c:0')

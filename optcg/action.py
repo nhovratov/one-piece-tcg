@@ -47,7 +47,7 @@ def perform_move(player, move):
             characterIndexToTrash = int(arguments[2])
         action.play_card(player, int(arguments[1]), characterIndexToTrash)
     elif chosen_action == 'b':
-        action.battle(player, arguments[1], arguments[2])
+        action.battle(player, arguments[1], arguments[2], parts[1:])
     elif chosen_action == 'g':
         action.attach_don(player, arguments[1], int(arguments[2]))
     elif chosen_action == 'a':
@@ -120,6 +120,12 @@ def return_attached_don(player, character):
     game[player]['field']['don']['active'] += state.get_attached_don(character)
     character['attachedDon'] = 0
 
+def reset_power_manipulation_for_turn(player):
+    leader = state.get_leader(player)
+    leader['powerIncreaseTurn'] = 0
+    for character in game[player]['field']['characters']:
+        character['powerIncreaseTurn'] = 0
+
 def attach_don(player, index, number):
     numberActiveDon = state.get_available_don(player)
     if number > numberActiveDon:
@@ -171,6 +177,7 @@ def reset_board(player):
     unrest_characters(player)
     unrest_leader(player)
     reset_effect_restrictions(player)
+    reset_power_manipulation_for_turn(util.getOpponent(player))
 
 def reset_effect_restrictions(player):
     for character in game[player]['field']['characters']:
@@ -229,7 +236,7 @@ def play_card(player, index, trashCharacterIndex = None):
         raise Exception('Index for trashing character on the field must be defined')
     rest_don(player, cost)
     game[player]['hand'].pop(index)
-    character = {'code': card, 'status': 'active', 'isExhausted': isExhausted, 'powerIncreaseBattle': 0, 'attachedDon': 0}
+    character = {'code': card, 'status': 'active', 'isExhausted': isExhausted, 'powerIncreaseBattle': 0, 'powerManipulationTurn': 0, 'attachedDon': 0}
     if numberOfCharacters == 5:
         trash_character(player, trashCharacterIndex)
     game[player]['field']['characters'].append(character)
@@ -255,7 +262,18 @@ def increaseBattlePowerOfLeader(player, counter):
 def increaseBattlePowerOfCharacter(player, counter, characterIndex):
     game[player]['field']['characters'][characterIndex]['powerIncreaseBattle'] += counter
 
-def battle(player, attackingCharacterIndexOrLeader, attackTargetIndexOrLeader):
+def manipulate_turn_power_of_leader_or_character(player, leader_or_character, power):
+    if leader_or_character == 'l':
+        manipulate_turn_power_of_leader(player, power)
+    manipulate_turn_power_of_character(player, int(leader_or_character), power)
+
+def manipulate_turn_power_of_leader(player, power):
+    game[player]['field']['leader']['powerManipulationTurn'] += power
+
+def manipulate_turn_power_of_character(player, index, power):
+    game[player]['field']['characters'][index]['powerManipulationTurn'] += power
+
+def battle(player, attackingCharacterIndexOrLeader, attackTargetIndexOrLeader, arguments = []):
     attackerIsLeader = attackingCharacterIndexOrLeader == 'l'
     targetIsLeader = attackTargetIndexOrLeader == 'l'
     if not attackerIsLeader:
@@ -286,7 +304,7 @@ def battle(player, attackingCharacterIndexOrLeader, attackTargetIndexOrLeader):
     + targetInfo['name']
     + ' [' + targetInfo['code'] + ']')
 
-    effect.resolveWhenAttackingEffect(player, attackingCharacterOrLeader)
+    effect.resolveWhenAttackingEffect(player, attackingCharacterOrLeader, arguments)
     attackerPower = calc.get_character_power(player, attackingCharacterOrLeader)
 
     if rule.canBlock(opponent) and attackerPower > 6000:

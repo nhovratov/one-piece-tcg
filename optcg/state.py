@@ -21,6 +21,7 @@ def create_player_state(deck):
                 'code': deck['leader'],
                 'status': 'active',
                 'powerIncreaseBattle': 0,
+                'powerManipulationTurn': 0,
                 'attachedDon': 0,
             },
             'stage': {},
@@ -45,6 +46,11 @@ def get_number_of_cards_in_hand(player):
 
 def get_leader(player):
     return game[player]['field']['leader']
+
+def get_leader_or_character(player, leader_or_character):
+    if leader_or_character == 'l':
+        return get_leader(player)
+    return get_character(player, int(leader_or_character))
 
 def get_life_count(player):
     return len(game[player]['life'])
@@ -95,7 +101,8 @@ def get_character_base_power(character):
 def get_character_power(player, character):
     basePower = get_character_base_power(character)
     donPower = get_don_power(player, character)
-    power = basePower + donPower
+    power_manipulation_turn = character['powerManipulationTurn']
+    power = basePower + donPower + power_manipulation_turn
     return power
 
 def get_leader_power(player):

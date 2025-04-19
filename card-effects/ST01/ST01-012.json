@@ -3,7 +3,7 @@
   "effect": {
     "trigger": "whenAttacking",
     "type": "ignoreBlocker",
-    "donCost": 2,
+    "attachedDon": 2,
     "duration": "battle"
   }
 }
