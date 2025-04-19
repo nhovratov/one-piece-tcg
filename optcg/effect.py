@@ -10,8 +10,30 @@ def checkPermanentCharacterPowerEffects(player, character):
     turnPlayer = state.get_turn_player()
     opponent = util.getOpponent(player)
 
-    for character in state.get_characters(opponent):
-        card_info = info.get_card_info(character['code'])
+    for field_character in state.get_characters(player):
+        card_info = info.get_card_info(field_character['code'])
+        effect = card_info.get('effect', None)
+        if effect == None:
+            continue
+        if effect['type'] != 'powerManipulation':
+            continue
+        if effect.get('turn') == 'yourTurn' and player != turnPlayer:
+            continue
+        target = effect['target']
+        if target == 'opponentCharacters':
+            continue
+        if target == 'yourCharacters' and characterInfo['type'] != 'character':
+            continue
+        if target == 'self' and character != field_character:
+            continue
+        needed_attached_don = effect.get('attachedDon', 0)
+        attached_don = state.get_attached_don(field_character)
+        if needed_attached_don < attached_don:
+            continue
+        power += effect['power']
+
+    for field_character in state.get_characters(opponent):
+        card_info = info.get_card_info(field_character['code'])
         effect = card_info.get('effect', None)
         if effect == None:
             continue
@@ -22,13 +44,16 @@ def checkPermanentCharacterPowerEffects(player, character):
         target = effect['target']
         if target == 'yourCharacters':
             continue
+        if target == 'self':
+            continue
         if target == 'opponentCharacters' and characterInfo['type'] != 'character':
             continue
-        donCost = effect.get('donCost', 0)
-        attachedDon = state.get_attached_don(character)
-        if attachedDon < donCost:
+        needed_attached_don = effect.get('attachedDon', 0)
+        attached_don = state.get_attached_don(field_character)
+        if needed_attached_don < attached_don:
             continue
         power += effect['power']
+
     return power
 
 def checkPermanentPowerEffectsLeader(player, character):
@@ -47,9 +72,9 @@ def checkPermanentPowerEffectsLeader(player, character):
     target = effect['target']
     if target == 'yourCharacters' and character_info['type'] != 'character':
         return power
-    donCost = effect.get('donCost', 0)
-    attachedDon = state.get_attached_don(turnLeader)
-    if attachedDon < donCost:
+    needed_attached_don = effect.get('attachedDon', 0)
+    attached_don = state.get_attached_don(turnLeader)
+    if needed_attached_don < attached_don:
         return power
     power += effect['power']
     return power
@@ -135,10 +160,10 @@ def resolveWhenAttackingEffect(player, character, arguments = []):
         return
     if effect.get('trigger') != 'whenAttacking':
         return
-    donCost = effect.get('donCost', 0)
-    if donCost > 0:
+    needed_attached_don = effect.get('attachedDon', 0)
+    if needed_attached_don > 0:
         attached_don = state.get_attached_don(character)
-        if attached_don < donCost:
+        if attached_don < needed_attached_don:
             return
     resolve_effect(player, character, arguments)
 
