@@ -25,12 +25,13 @@ def checkPermanentCharacterPowerEffects(player, character):
                 continue
             if target == 'yourCharacters' and characterInfo['type'] != 'character':
                 continue
-            if target == 'self' and character != field_character:
+            if target == 'self' and character is not field_character:
                 continue
-            needed_attached_don = effect.get('attachedDon', 0)
-            attached_don = state.get_attached_don(field_character)
-            if attached_don < needed_attached_don:
-                continue
+            needed_attached_don = effect.get('attachedDon')
+            if needed_attached_don is not None:
+                attached_don = state.get_attached_don(field_character)
+                if attached_don < needed_attached_don:
+                    continue
             power += effect['power']
 
     for field_character in state.get_characters(opponent):
@@ -50,10 +51,11 @@ def checkPermanentCharacterPowerEffects(player, character):
                 continue
             if target == 'opponentCharacters' and characterInfo['type'] != 'character':
                 continue
-            needed_attached_don = effect.get('attachedDon', 0)
-            attached_don = state.get_attached_don(field_character)
-            if needed_attached_don < attached_don:
-                continue
+            needed_attached_don = effect.get('attachedDon')
+            if needed_attached_don is not None:
+                attached_don = state.get_attached_don(field_character)
+                if needed_attached_don < attached_don:
+                    continue
             power += effect['power']
 
     return power
@@ -75,10 +77,11 @@ def checkPermanentPowerEffectsLeader(player, character):
         target = effect['target']
         if target == 'yourCharacters' and character_info['type'] != 'character':
             return power
-        needed_attached_don = effect.get('attachedDon', 0)
-        attached_don = state.get_attached_don(turnLeader)
-        if attached_don < needed_attached_don:
-            return power
+        needed_attached_don = effect.get('attachedDon')
+        if needed_attached_don is not None:
+            attached_don = state.get_attached_don(turnLeader)
+            if attached_don < needed_attached_don:
+                return power
         power += effect['power']
     return power
 
