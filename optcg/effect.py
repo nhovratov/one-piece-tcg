@@ -29,7 +29,7 @@ def checkPermanentCharacterPowerEffects(player, character):
                 continue
             needed_attached_don = effect.get('attachedDon', 0)
             attached_don = state.get_attached_don(field_character)
-            if needed_attached_don < attached_don:
+            if attached_don < needed_attached_don:
                 continue
             power += effect['power']
 
@@ -77,7 +77,7 @@ def checkPermanentPowerEffectsLeader(player, character):
             return power
         needed_attached_don = effect.get('attachedDon', 0)
         attached_don = state.get_attached_don(turnLeader)
-        if needed_attached_don < attached_don:
+        if attached_don < needed_attached_don:
             return power
         power += effect['power']
     return power
