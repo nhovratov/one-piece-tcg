@@ -12,47 +12,49 @@ def checkPermanentCharacterPowerEffects(player, character):
 
     for field_character in state.get_characters(player):
         card_info = info.get_card_info(field_character['code'])
-        effect = card_info.get('effect', None)
-        if effect == None:
+        effects = card_info.get('effect', None)
+        if effects == None:
             continue
-        if effect['type'] != 'powerManipulation':
-            continue
-        if effect.get('turn') == 'yourTurn' and player != turnPlayer:
-            continue
-        target = effect['target']
-        if target == 'opponentCharacters':
-            continue
-        if target == 'yourCharacters' and characterInfo['type'] != 'character':
-            continue
-        if target == 'self' and character != field_character:
-            continue
-        needed_attached_don = effect.get('attachedDon', 0)
-        attached_don = state.get_attached_don(field_character)
-        if needed_attached_don < attached_don:
-            continue
-        power += effect['power']
+        for effect in effects:
+            if effect['type'] != 'powerManipulation':
+                continue
+            if effect.get('turn') == 'yourTurn' and player != turnPlayer:
+                continue
+            target = effect['target']
+            if target == 'opponentCharacters':
+                continue
+            if target == 'yourCharacters' and characterInfo['type'] != 'character':
+                continue
+            if target == 'self' and character != field_character:
+                continue
+            needed_attached_don = effect.get('attachedDon', 0)
+            attached_don = state.get_attached_don(field_character)
+            if needed_attached_don < attached_don:
+                continue
+            power += effect['power']
 
     for field_character in state.get_characters(opponent):
         card_info = info.get_card_info(field_character['code'])
-        effect = card_info.get('effect', None)
-        if effect == None:
+        effects = card_info.get('effect', None)
+        if effects == None:
             continue
-        if effect['type'] != 'powerManipulation':
-            continue
-        if effect.get('turn') == 'yourTurn' and player != turnPlayer:
-            continue
-        target = effect['target']
-        if target == 'yourCharacters':
-            continue
-        if target == 'self':
-            continue
-        if target == 'opponentCharacters' and characterInfo['type'] != 'character':
-            continue
-        needed_attached_don = effect.get('attachedDon', 0)
-        attached_don = state.get_attached_don(field_character)
-        if needed_attached_don < attached_don:
-            continue
-        power += effect['power']
+        for effect in effects:
+            if effect['type'] != 'powerManipulation':
+                continue
+            if effect.get('turn') == 'yourTurn' and player != turnPlayer:
+                continue
+            target = effect['target']
+            if target == 'yourCharacters':
+                continue
+            if target == 'self':
+                continue
+            if target == 'opponentCharacters' and characterInfo['type'] != 'character':
+                continue
+            needed_attached_don = effect.get('attachedDon', 0)
+            attached_don = state.get_attached_don(field_character)
+            if needed_attached_don < attached_don:
+                continue
+            power += effect['power']
 
     return power
 
@@ -62,32 +64,46 @@ def checkPermanentPowerEffectsLeader(player, character):
     turnPlayer = state.get_turn_player()
     turnLeader = state.get_leader(turnPlayer)
     card_info_leader = info.get_card_info(turnLeader['code'])
-    effect = card_info_leader.get('effect', None)
-    if effect == None:
+    effects = card_info_leader.get('effect')
+    if effects == None:
         return power
-    if effect['type'] != 'powerManipulation':
-        return power
-    if effect['turn'] == 'yourTurn' and player != turnPlayer:
-        return power
-    target = effect['target']
-    if target == 'yourCharacters' and character_info['type'] != 'character':
-        return power
-    needed_attached_don = effect.get('attachedDon', 0)
-    attached_don = state.get_attached_don(turnLeader)
-    if needed_attached_don < attached_don:
-        return power
-    power += effect['power']
+    for effect in effects:
+        if effect['type'] != 'powerManipulation':
+            return power
+        if effect['turn'] == 'yourTurn' and player != turnPlayer:
+            return power
+        target = effect['target']
+        if target == 'yourCharacters' and character_info['type'] != 'character':
+            return power
+        needed_attached_don = effect.get('attachedDon', 0)
+        attached_don = state.get_attached_don(turnLeader)
+        if needed_attached_don < attached_don:
+            return power
+        power += effect['power']
     return power
 
-def resolve_effect(player, character, arguments = []):
-    card_info = info.get_card_info(character['code'])
-    effect = card_info.get('effect')
+def resolve_trigger_effect(player, trigger_card, arguments = []):
+    card_info = info.get_card_info(trigger_card)
+    effect = card_info.get('triggerEffect')
     if effect is None:
         return
+    resolve_effect(player, {}, effect, arguments)
+
+def resolve_card_effect(player, effect_card, effect_index, arguments = []):
+    card_info = info.get_card_info(effect_card['code'])
+    effects = card_info.get('effect')
+    if effects is None:
+        return
+    if len(effects) <= effect_index:
+        return
+    effect = effects[effect_index]
+    resolve_effect(player, effect_card, effect, arguments)
+
+def resolve_effect(player, effect_card, effect, arguments = []):
     restriction = effect.get('restriction')
     if restriction is not None:
         if restriction == 'oncePerTurn':
-            effect_used_this_turn = character.get('effect_used_this_turn')
+            effect_used_this_turn = effect_card.get('effect_used_this_turn')
             if effect_used_this_turn:
                 return
     type = effect['type']
@@ -124,8 +140,8 @@ def resolve_effect(player, character, arguments = []):
         # todo: Allow to specify quantity as well.
         quantity = int(effect['quantity'])
         action.attach_rested_don(player, target, quantity)
-    elif type == 'gainRush' and state.is_exhausted(character):
-        action.rush_character(character)
+    elif type == 'gainRush' and state.is_exhausted(effect_card):
+        action.rush_character(effect_card)
     elif type == 'powerManipulation':
         power = effect['power']
         # todo: Check valid target
@@ -136,42 +152,50 @@ def resolve_effect(player, character, arguments = []):
         chosen_target = arguments[0]
         action.manipulate_turn_power_of_leader_or_character(player, chosen_target, power)
     if restriction == 'oncePerTurn':
-        character['effect_used_this_turn'] = True
+        effect_card['effect_used_this_turn'] = True
         # todo implement turn duration
 
 def resolve_when_attaching_don(player, character):
     card_info = info.get_card_info(character['code'])
-    effect = card_info.get('effect')
-    if effect is None:
+    effects = card_info.get('effect')
+    if effects is None:
         return
-    # The effect is activated as soon as enough DON is attached.
-    if not 'attachedDon' in effect:
-        return
-    if 'trigger' in effect:
-        return
-    if state.get_attached_don(character) < effect['attachedDon']:
-        return
-    resolve_effect(player, character)
+    for effect in effects:
+        # The effect is activated as soon as enough DON is attached.
+        if not 'attachedDon' in effect:
+            return
+        if 'trigger' in effect:
+            return
+        if state.get_attached_don(character) < effect['attachedDon']:
+            return
+        resolve_card_effect(player, character, 0)
 
 def resolveWhenAttackingEffect(player, character, arguments = []):
     card_info = info.get_card_info(character['code'])
-    effect = card_info.get('effect')
-    if effect is None:
+    effects = card_info.get('effect')
+    if effects is None:
         return
-    if effect.get('trigger') != 'whenAttacking':
+    if len(effects) == 0:
         return
-    needed_attached_don = effect.get('attachedDon', 0)
-    if needed_attached_don > 0:
-        attached_don = state.get_attached_don(character)
-        if attached_don < needed_attached_don:
+    for (index, effect) in enumerate(effects):
+        if effect.get('trigger') != 'whenAttacking':
             return
-    resolve_effect(player, character, arguments)
+        needed_attached_don = effect.get('attachedDon', 0)
+        if needed_attached_don > 0:
+            attached_don = state.get_attached_don(character)
+            if attached_don < needed_attached_don:
+                return
+        resolve_card_effect(player, character, index, arguments)
 
 def can_be_activated(player, character):
+    effect_index = 0
     card_info = info.get_card_info(character['code'])
-    effect = card_info.get('effect')
-    if effect is None:
+    effects = card_info.get('effect')
+    if effects is None:
         return False
+    if len(effects) <= effect_index:
+        return False
+    effect = effects[effect_index]
     if effect.get('trigger') != 'activateMain':
         return False
     restriction = effect.get('restriction')

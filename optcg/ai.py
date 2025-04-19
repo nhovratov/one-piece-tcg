@@ -42,6 +42,18 @@ def ai_counter2(player, attackerPower, targetPower, target):
     move = ai_counter2_method(player, attackerPower, targetPower, target)
     return move
 
+def get_strategies():
+    return {
+        'ai_aggro_generic': {
+            'move': 'ai_move_aggro',
+            'counter': 'ai_counter_early_characters'
+        },
+        'ai_control_generic': {
+            'move': 'ai_move_control',
+            'counter': 'ai_counter_early_characters'
+        },
+    }
+
 def ai_counter_early_characters(player, attackerPower, targetPower, target):
     # If life is less than 3, counter with all there is.
     counterNeeded = attackerPower - targetPower + 1000
@@ -416,3 +428,11 @@ def getGreenUtaMove(player):
     if availableDon == highestCost:
         return None
     return 'g:l:1'
+
+def handle_trigger(player, card):
+    if card == 'ST01-014':
+        return ST01_014_trigger_strategy(player)
+    return None
+
+def ST01_014_trigger_strategy(player):
+    return 'l'

@@ -57,7 +57,7 @@ def perform_move(player, move):
             character_or_leader = state.get_character(player)
         if effect.can_be_activated(player, character_or_leader):
             log('Effect of ' + character_or_leader['code'] + ' is activated')
-            effect.resolve_effect(player, character_or_leader, parts[1:])
+            effect.resolve_card_effect(player, character_or_leader, 0, parts[1:])
         else:
             log('Effect can not be activated')
     return True
@@ -198,12 +198,15 @@ def trash_character(player, index):
     game[player]['field']['characters'].pop(index)
     log(player + ' trashes character: ' + info.getHumanReadableCharacterName(card))
 
-def trash_card(player, index):
+def trash_card_from_hand(player, index):
     hand = state.get_hand(player)
     card = hand[index]
-    game[player]['trash'].append(card)
+    trash_card(player, card)
     game[player]['hand'].pop(index)
     log(player + ' trashes ' + info.getHumanReadableCharacterName(card))
+
+def trash_card(player, card):
+    game[player]['trash'].append(card)
 
 def next_turn():
     game['turn'] += 1
@@ -247,14 +250,14 @@ def counter_attack_leader(player, counterIndex):
     cardInfo = info.get_card_info(card)
     counter = cardInfo['counter']
     increaseBattlePowerOfLeader(player, counter)
-    trash_card(player, counterIndex)
+    trash_card_from_hand(player, counterIndex)
 
 def counter_attack_character(player, counterIndex, characterIndex):
     card = state.get_hand(player)[counterIndex]
     cardInfo = info.get_card_info(card)
     counter = cardInfo['counter']
     increaseBattlePowerOfCharacter(player, counter, characterIndex)
-    trash_card(player, counterIndex)
+    trash_card_from_hand(player, counterIndex)
 
 def increaseBattlePowerOfLeader(player, counter):
     game[player]['field']['leader']['powerIncreaseBattle'] += counter
@@ -265,6 +268,7 @@ def increaseBattlePowerOfCharacter(player, counter, characterIndex):
 def manipulate_turn_power_of_leader_or_character(player, leader_or_character, power):
     if leader_or_character == 'l':
         manipulate_turn_power_of_leader(player, power)
+        return
     manipulate_turn_power_of_character(player, int(leader_or_character), power)
 
 def manipulate_turn_power_of_leader(player, power):
@@ -391,6 +395,13 @@ def dealDamage(opponent):
         print(leaderName + ' (' + player + ') wins')
         state.set_winner(player)
         return
-    card = game[opponent]['life'][-1:]
-    game[opponent]['hand'] += card
+    card = game[opponent]['life'][-1]
     game[opponent]['life'] = game[opponent]['life'][:-1]
+    card_info = info.get_card_info(card)
+    if card_info.get('triggerEffect') is not None:
+        arguments = ai.handle_trigger(opponent, card)
+        if arguments is not None:
+            effect.resolve_trigger_effect(opponent, card, arguments)
+            action.trash_card(opponent, card)
+            return
+    game[opponent]['hand'].append(card)

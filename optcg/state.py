@@ -38,6 +38,9 @@ def create_player_state(deck):
 def get_hand(player):
     return game[player]['hand']
 
+def get_trash(player):
+    return game[player]['trash']
+
 def get_card(player, index):
     return game[player]['hand'][index]
 

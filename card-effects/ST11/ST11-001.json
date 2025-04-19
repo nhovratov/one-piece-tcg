@@ -1,10 +1,14 @@
 {
-  "effect": {
-    "attachedDon": 1,
-    "trigger": "whenAttacking",
-    "restriction": "oncePerTurn",
-    "type": "search",
-    "searchType": ["FILM"],
-    "quantity": 1
-  }
+  "effect": [
+    {
+      "attachedDon": 1,
+      "trigger": "whenAttacking",
+      "restriction": "oncePerTurn",
+      "type": "search",
+      "searchType": [
+        "FILM"
+      ],
+      "quantity": 1
+    }
+  ]
 }

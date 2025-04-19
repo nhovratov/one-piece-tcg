@@ -1,0 +1,8 @@
+{
+    "triggerEffect": {
+        "type": "powerManipulation",
+        "power": 1000,
+        "duration": "turn",
+        "target": "leaderOrCharacter"
+    }
+}

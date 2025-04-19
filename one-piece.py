@@ -23,21 +23,22 @@ deck1 = deck.create(player1_conf['deck'])
 deck2 = deck.create(player2_conf['deck'])
 state.create(deck1, deck2)
 
-if player1_conf['ai_strategy_attack'] == 'manual':
+strategies = ai.get_strategies()
+player1 = player1_conf['player']
+player2 = player1_conf['player']
+if player1 == 'user':
     ai.set_ai_move1(user.get_manual_move)
-else:
-    ai.set_ai_move1(getattr(ai, player1_conf['ai_strategy_attack']))
-
-if player1_conf['ai_strategy_counter'] == 'manual':
     ai.set_ai_counter_move1(user.manual_counter)
 else:
-    ai.set_ai_counter_move1(getattr(ai, player1_conf['ai_strategy_counter']))
+    strategy = strategies[player1]
+    ai.set_ai_move1(getattr(ai, strategy['move']))
+    ai.set_ai_counter_move1(getattr(ai, strategy['counter']))
+strategy = strategies[player2]
+ai.set_ai_move2(getattr(ai, strategy['move']))
+ai.set_ai_counter_move2(getattr(ai, strategy['counter']))
 
-ai.set_ai_move2(getattr(ai, player2_conf['ai_strategy_attack']))
-ai.set_ai_counter_move2(getattr(ai, player2_conf['ai_strategy_counter']))
 action.set_player1_move(ai.ai_move1)
 action.set_player2_move(ai.ai_move2)
-
 action.shuffle_deck('player1')
 action.shuffle_deck('player2')
 action.draw_cards('player1', 5)

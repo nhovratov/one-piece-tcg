@@ -1,9 +1,10 @@
 {
-    "effect": {
-      "attachedDon": 1,
-      "type": "powerManipulation",
-      "power": 1000,
-      "target": "self"
-    }
-  }
-  
+    "effect": [
+        {
+            "attachedDon": 1,
+            "type": "powerManipulation",
+            "power": 1000,
+            "target": "self"
+        }
+    ]
+}

@@ -1,9 +1,11 @@
 {
   "hasRush": true,
-  "effect": {
-    "trigger": "whenAttacking",
-    "type": "ignoreBlocker",
-    "attachedDon": 2,
-    "duration": "battle"
-  }
+  "effect": [
+    {
+      "trigger": "whenAttacking",
+      "type": "ignoreBlocker",
+      "attachedDon": 2,
+      "duration": "battle"
+    }
+  ]
 }

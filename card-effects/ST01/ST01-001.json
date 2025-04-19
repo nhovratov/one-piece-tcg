@@ -1,9 +1,11 @@
 {
-    "effect": {
-        "restriction": "oncePerTurn",
-        "type": "giveRestedDon",
-        "quantity": "1",
-        "trigger": "activateMain",
-        "target": "leaderOrCharacter"
-    }
+    "effect": [
+        {
+            "restriction": "oncePerTurn",
+            "type": "giveRestedDon",
+            "quantity": "1",
+            "trigger": "activateMain",
+            "target": "leaderOrCharacter"
+        }
+    ]
 }
