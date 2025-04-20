@@ -25,7 +25,7 @@ state.create(deck1, deck2)
 
 strategies = ai.get_strategies()
 player1 = player1_conf['player']
-player2 = player1_conf['player']
+player2 = player2_conf['player']
 if player1 == 'user':
     ai.set_ai_move1(user.get_manual_move)
     ai.set_ai_counter_move1(user.manual_counter)
