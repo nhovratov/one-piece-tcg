@@ -18,6 +18,8 @@ def checkPermanentCharacterPowerEffects(player, character):
         for effect in effects:
             if effect['type'] != 'powerManipulation':
                 continue
+            if effect.get('trigger') is not None:
+                continue
             if effect.get('turn') == 'yourTurn' and player != turnPlayer:
                 continue
             target = effect['target']
@@ -41,6 +43,8 @@ def checkPermanentCharacterPowerEffects(player, character):
             continue
         for effect in effects:
             if effect['type'] != 'powerManipulation':
+                continue
+            if effect.get('trigger') is not None:
                 continue
             if effect.get('turn') == 'yourTurn' and player != turnPlayer:
                 continue
